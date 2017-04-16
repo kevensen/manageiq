@@ -36,6 +36,7 @@ class ContainerProject < ApplicationRecord
 
   include EventMixin
   include Metric::CiMixin
+  include ContainerResourceParentMixin
 
   PERF_ROLLUP_CHILDREN = :all_container_groups
 
@@ -68,5 +69,27 @@ class ContainerProject < ApplicationRecord
     self.ext_management_system = nil
     self.deleted_on = Time.now.utc
     save
+  end
+
+  def add_role_to_user(user_name, role_name)
+    if role_name.empty?
+      raise MiqException::MiqProvisionError, "When adding a role to a user the role cannot be empty."
+    end
+
+    role_binding = Kubeclient::Resource.new
+    role_binding.kind = 'RoleBinding'
+    role_binding.apiVersion = 'v1'
+    role_binding.metadata = {}
+    role_binding.metadata.namespace = name
+    role_binding.metadata.name = role_name
+    role_binding.roleRef = {}
+    role_binding.roleRef.name = role_name
+    role_binding.userNames = [user_name]
+
+    if get_resource_by_name(role_name, 'RoleBinding', name).nil?
+      create_resource(role_binding.to_h)
+    else
+      patch_resource(role_binding.to_h)
+    end
   end
 end
