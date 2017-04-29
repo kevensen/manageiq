@@ -91,7 +91,7 @@ class ContainerProject < ApplicationRecord
       create_resource(role_binding.to_h)
     else
       role_binding.userNames.push(user_name)
-      patch_resource(role_binding.to_h)
+      update_in_provider(role_binding.to_h)
     end
   end
 end
