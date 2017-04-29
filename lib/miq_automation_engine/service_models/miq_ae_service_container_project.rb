@@ -3,9 +3,6 @@ module MiqAeMethodService
     expose :ext_management_system,  :association => true
     expose :container_groups,       :association => true
     expose :create_resource
-    expose :patch_resource
-    expose :get_resources
-    expose :get_resource_by_name
     expose :add_role_to_user
   end
 end

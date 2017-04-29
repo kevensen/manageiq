@@ -29,18 +29,38 @@ module ContainerResourceMixin
     response
   end
 
-  # Patches the resource in provider.  This is essentially an HTTP PUT by
-  # the client.
-  def patch_in_provider(data_to_patch, api_version = 'v1')
-    method_name = "patch_#{kind_in_provider.underscore}"
-    data_to_patch[:metadata][:name] = name
-    data_to_patch[:metadata][:namespace] = namespace
-    params = [name, data_to_patch.deep_symbolize_keys!, namespace]
+  # Retrieves the resource from the provider and returns the hash without unique
+  # attributes (e.g. UID, self-link, resource version, etc.)
+  def get_from_provider_clean(api_version = 'v1')
+    response = get_from_provider(api_version)
+    response[:metadata].delete(:selfLink)
+    response[:metadata].delete(:uid)
+    response[:metadata].delete(:resourceVersion)
+    response[:metadata].delete(:creationTimestamp)
+    response[:metadata].delete(:generation)
+    response.delete(:status)
+    response[:spec].delete(:clusterIP)
+    response
+  end
+
+  # Updates the resource in provider.  This is a wholesale replace.  The
+  # metadata/name and metadata/namespace are set to the name and namesapce of
+  # this resource.
+  def update_in_provider(resource, api_version = 'v1')
+    method_name = "update_#{kind_in_provider.underscore}"
+    resource.deep_symbolize_keys!
+    resource[:metadata][:name] = name
+    resource[:metadata][:namespace] = namespace
+    if resource[:kind] != kind_in_provider
+      raise MiqException::MiqProvisionError, "Unexpected Exception while updating object with resource name #{name} in namespace namespace #{namespace}.  The update kind #{resource[:kind]} doesn't match the existing resource kind #{kind_in_provider}."
+    end
+
+    params = [resource]
     response, error_code, msg = send_method(method_name, params, api_version)
     if error_code == 404
       return nil
     elsif error_code != 200
-      raise MiqException::MiqProvisionError, "Unexpected Exception while patching object with resource name #{name}, namespace #{namespace}, method name #{method_name}, HTTP response code #{error_code}, and message #{msg}."
+      raise MiqException::MiqProvisionError, "Unexpected Exception while updating object with resource name #{name}, namespace #{namespace}, method name #{method_name}, HTTP response code #{error_code}, and message #{msg}."
     end
     response
   end

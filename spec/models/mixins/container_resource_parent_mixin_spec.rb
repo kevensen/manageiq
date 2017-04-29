@@ -42,112 +42,16 @@ describe ContainerResourceParentMixin do
       @test_service[:spec][:selector][:name] = 'mysql'
     end
 
-    # The *.ext_management_system.connect_client method is the only
-    # method in the provider (container_manager) on which this mixin relies
-    it "ems responds to connect_client" do
-      expect(@test_project.ext_management_system.respond_to?(:connect_client)).to be_truthy
-    end
-
-    # These tests are boiler plate
-    it "responds to get_resource_by_name" do
-      expect(@test_project.respond_to?(:get_resource_by_name)).to be_truthy
-    end
-
-    it "responds to get_resources" do
-      expect(@test_project.respond_to?(:get_resources)).to be_truthy
-    end
-
-    it "responds to create_resource" do
-      expect(@test_project.respond_to?(:create_resource)).to be_truthy
-    end
-
-    it "responds to patch_resource" do
-      expect(@test_project.respond_to?(:patch_resource)).to be_truthy
-    end
-
-    it "responds to send_method" do
-      expect(@test_project.respond_to?(:send_method)).to be_falsey
-    end
-
-    it "ems responds to ext_management_system" do
-      expect(@test_project.respond_to?(:ext_management_system)).to be_truthy
-    end
-
-    it "gets resources yields an array" do
-      VCR.use_cassette("mixins/#{described_class.name.underscore}/get_resoruces",
-                       :match_requests_on => [:path,]) do
-        results = @test_project.get_resources('Services')
-        expect(results.kind_of?(Array)).to be_truthy
-      end
-    end
-
-    it "gets resources yields an array even if only a single element" do
-      VCR.use_cassette("mixins/#{described_class.name.underscore}/get_resoruces_one",
-                       :match_requests_on => [:path,]) do
-        results = @test_project.get_resources('BuildConfigs')
-        expect(results.kind_of?(Array)).to be_truthy
-      end
-    end
-
-    it "gets resources yields an array with each element a hash" do
-      VCR.use_cassette("mixins/#{described_class.name.underscore}/get_resoruces",
-                       :match_requests_on => [:path,]) do
-        results = @test_project.get_resources('Services')
-        results.each do |result|
-          expect(result.kind_of?(Hash)).to be_truthy
-        end
-      end
-    end
-
-    it "gets resources only in testproject namespace" do
-      VCR.use_cassette("mixins/#{described_class.name.underscore}/get_resoruces",
-                       :match_requests_on => [:path,]) do
-        results = @test_project.get_resources('Services')
-        results.each do |result|
-          expect(result[:metadata][:namespace].eql?('testproject')).to be_truthy
-        end
-      end
-    end
-
-    it "gets single resource by name in testproject namespace" do
-      VCR.use_cassette("mixins/#{described_class.name.underscore}/get_resoruce_by_name",
-                       :match_requests_on => [:path,]) do
-        result = @test_project.get_resource_by_name('mysql', 'Service')
-        expect(result[:metadata][:namespace].eql?('testproject'))
-        expect(result.kind_of?(Hash)).to be_truthy
-      end
-    end
-
-    it "returns nil if resource with name doesn't exist " do
-      VCR.use_cassette("mixins/#{described_class.name.underscore}/get_resoruce_by_name_nil",
-                       :match_requests_on => [:path,]) do
-        result = @test_project.get_resource_by_name('wrongservice', 'Service')
-        expect(result.nil?).to be_truthy
-      end
-    end
-
-    it "raises an exception if resource being created already exists " do
-      VCR.use_cassette("mixins/#{described_class.name.underscore}/create_existing_resource",
-                       :match_requests_on => [:path,]) do
-        expect { @test_project.create_resource(@test_service.to_h) }.to raise_error(MiqException::MiqProvisionError)
-      end
-    end
-
     it "returns a hash of a successfully created resource " do
-      VCR.use_cassette("mixins/#{described_class.name.underscore}/create_new_resource",
+      VCR.use_cassette("mixins/#{described_class.name.underscore}/create_resource",
                        :match_requests_on => [:path,]) do
         test_service_two = @test_service.dup
         test_service_two[:metadata][:name] = 'mysql2'
-        expect(@test_project.create_resource(test_service_two.to_h).kind_of?(Hash)).to be_truthy
-      end
-    end
+        test_service_two_from_provider = FactoryGirl.create(:container_service, :name => 'mysql2', :container_project => @test_project)
+        result = @test_project.create_resource(test_service_two.to_h)
 
-    it "returns a hash of a successfully patched resource " do
-      VCR.use_cassette("mixins/#{described_class.name.underscore}/patch_resource",
-                       :match_requests_on => [:path,]) do
-        test_service_two = @test_service.dup
-        test_service_two[:metadata][:name] = 'mysql2'
-        expect(@test_project.create_resource(test_service_two.to_h).kind_of?(Hash)).to be_truthy
+        expect(result.kind_of?(Hash)).to be_truthy
+        expect(result).to eq(test_service_two_from_provider.get_from_provider)
       end
     end
   end

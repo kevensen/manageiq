@@ -25,7 +25,7 @@ http_interactions:
       Content-Type:
       - application/json
       Date:
-      - Fri, 28 Apr 2017 18:23:56 GMT
+      - Sat, 29 Apr 2017 11:41:22 GMT
       Transfer-Encoding:
       - chunked
     body:
@@ -34,7 +34,7 @@ http_interactions:
 
 '
     http_version:
-  recorded_at: Fri, 28 Apr 2017 18:23:56 GMT
+  recorded_at: Sat, 29 Apr 2017 11:41:22 GMT
 - request:
     method: get
     uri: https://host.example.com:8443/api/v1
@@ -60,7 +60,7 @@ http_interactions:
       Content-Type:
       - application/json
       Date:
-      - Fri, 28 Apr 2017 18:23:56 GMT
+      - Sat, 29 Apr 2017 11:41:22 GMT
       Transfer-Encoding:
       - chunked
     body:
@@ -69,10 +69,10 @@ http_interactions:
 
 '
     http_version:
-  recorded_at: Fri, 28 Apr 2017 18:23:56 GMT
+  recorded_at: Sat, 29 Apr 2017 11:41:22 GMT
 - request:
-    method: delete
-    uri: https://host.example.com:8443/api/v1/namespaces/testproject/services/mysql2
+    method: get
+    uri: https://host.example.com:8443/api/v1/namespaces/testproject/services/mysql
     body:
       encoding: US-ASCII
       string: ''
@@ -95,19 +95,61 @@ http_interactions:
       Content-Type:
       - application/json
       Date:
-      - Fri, 28 Apr 2017 18:23:56 GMT
+      - Sat, 29 Apr 2017 11:41:22 GMT
       Content-Length:
-      - '80'
+      - '626'
     body:
       encoding: UTF-8
-      string: '{"kind":"Status","apiVersion":"v1","metadata":{},"status":"Success","code":200}
+      string: '{"kind":"Service","apiVersion":"v1","metadata":{"name":"mysql","namespace":"testproject","selfLink":"/api/v1/namespaces/testproject/services/mysql","uid":"eb0effb0-29c9-11e7-b2c1-000c294e0cbd","resourceVersion":"64745","creationTimestamp":"2017-04-25T15:14:46Z","labels":{"app":"cakephp-mysql-example-test-patch","template":"cakephp-mysql-example"},"annotations":{"description":"Description
+        has been updated."}},"spec":{"ports":[{"name":"mysql","protocol":"TCP","port":3306,"targetPort":3306}],"selector":{"name":"mysql"},"clusterIP":"172.30.208.196","type":"ClusterIP","sessionAffinity":"None"},"status":{"loadBalancer":{}}}
 
 '
     http_version:
-  recorded_at: Fri, 28 Apr 2017 18:23:56 GMT
+  recorded_at: Sat, 29 Apr 2017 11:41:22 GMT
+- request:
+    method: put
+    uri: https://host.example.com:8443/api/v1/namespaces/testproject/services/mysql
+    body:
+      encoding: UTF-8
+      string: '{"kind":"Service","apiVersion":"v1","metadata":{"name":"mysql","namespace":"testproject","selfLink":"/api/v1/namespaces/testproject/services/mysql","uid":"eb0effb0-29c9-11e7-b2c1-000c294e0cbd","resourceVersion":"64745","creationTimestamp":"2017-04-25T15:14:46Z","labels":{"app":"cakephp-mysql-example-test-patch","template":"cakephp-mysql-example"},"annotations":{"description":"Description
+        has been updated."}},"spec":{"ports":[{"name":"mysql","protocol":"TCP","port":3306,"targetPort":3306}],"selector":{"name":"mysql"},"clusterIP":"172.30.208.196","type":"ClusterIP","sessionAffinity":"None"},"status":{"loadBalancer":{}}}'
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.1 (darwin16.1.0 x86_64) ruby/2.2.6p396
+      Content-Type:
+      - application/json
+      Authorization:
+      - Bearer theToken
+      Content-Length:
+      - '625'
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - no-store
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 29 Apr 2017 11:41:22 GMT
+      Content-Length:
+      - '626'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"Service","apiVersion":"v1","metadata":{"name":"mysql","namespace":"testproject","selfLink":"/api/v1/namespaces/testproject/services/mysql","uid":"eb0effb0-29c9-11e7-b2c1-000c294e0cbd","resourceVersion":"64745","creationTimestamp":"2017-04-25T15:14:46Z","labels":{"app":"cakephp-mysql-example-test-patch","template":"cakephp-mysql-example"},"annotations":{"description":"Description
+        has been updated."}},"spec":{"ports":[{"name":"mysql","protocol":"TCP","port":3306,"targetPort":3306}],"selector":{"name":"mysql"},"clusterIP":"172.30.208.196","type":"ClusterIP","sessionAffinity":"None"},"status":{"loadBalancer":{}}}
+
+'
+    http_version:
+  recorded_at: Sat, 29 Apr 2017 11:41:22 GMT
 - request:
     method: get
-    uri: https://host.example.com:8443/api/v1/namespaces/testproject/services/mysql2
+    uri: https://host.example.com:8443/api/v1/namespaces/testproject/services/mysql
     body:
       encoding: US-ASCII
       string: ''
@@ -122,23 +164,23 @@ http_interactions:
       - Bearer theToken
   response:
     status:
-      code: 404
-      message: Not Found
+      code: 200
+      message: OK
     headers:
       Cache-Control:
       - no-store
       Content-Type:
       - application/json
       Date:
-      - Fri, 28 Apr 2017 18:23:56 GMT
+      - Sat, 29 Apr 2017 11:41:22 GMT
       Content-Length:
-      - '188'
+      - '626'
     body:
       encoding: UTF-8
-      string: '{"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"services
-        \"mysql2\" not found","reason":"NotFound","details":{"name":"mysql2","kind":"services"},"code":404}
+      string: '{"kind":"Service","apiVersion":"v1","metadata":{"name":"mysql","namespace":"testproject","selfLink":"/api/v1/namespaces/testproject/services/mysql","uid":"eb0effb0-29c9-11e7-b2c1-000c294e0cbd","resourceVersion":"64745","creationTimestamp":"2017-04-25T15:14:46Z","labels":{"app":"cakephp-mysql-example-test-patch","template":"cakephp-mysql-example"},"annotations":{"description":"Description
+        has been updated."}},"spec":{"ports":[{"name":"mysql","protocol":"TCP","port":3306,"targetPort":3306}],"selector":{"name":"mysql"},"clusterIP":"172.30.208.196","type":"ClusterIP","sessionAffinity":"None"},"status":{"loadBalancer":{}}}
 
 '
     http_version:
-  recorded_at: Fri, 28 Apr 2017 18:23:56 GMT
+  recorded_at: Sat, 29 Apr 2017 11:41:22 GMT
 recorded_with: VCR 3.0.3

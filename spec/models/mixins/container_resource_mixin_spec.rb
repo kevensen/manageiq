@@ -3,7 +3,7 @@ describe ContainerResourceMixin do
     before(:each) do
       allow(MiqServer).to receive(:my_zone).and_return("default")
       hostname = 'host.example.com'
-      token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJtYW5hZ2VtZW50LWluZnJhIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6Im1hbmFnZW1lbnQtYWRtaW4tdG9rZW4tMXpkZmciLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoibWFuYWdlbWVudC1hZG1pbiIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImMyNmM0NDlmLTIxZTEtMTFlNy1hYzM0LTAwMGMyOTRlMGNiZCIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDptYW5hZ2VtZW50LWluZnJhOm1hbmFnZW1lbnQtYWRtaW4ifQ.YxnMXhItkkBl8724_JnOBD0Pc7hKJ7tVBWET0XdOInWFBi6sGcrzg3ei7uRoM4xZ_B2P8YkALdpNk6PCSMbpI6JKB-oNioicZxy-HHzt2VofH-9qxjlOgKLHQEng4kuU8sUx7_RUQRwW0AEvPDF-8O-xcDZ1cZA9C17pOXcV7W_2Eirs2usrOvtSmBqWJDjuSLrWNa79i1_rG3QfcLqujsqzjI95H211MTOd-JxZeipX6KuyW_jmwO6UJUy2ct3P8ywn6Y4jUvYyf3F22Lmjf4euv71rXfGq_ZApVvQGb5fV7Z5mkXDexSyWFxIlomaSGe94hsKBsIAJvupRBr08_g'
+      token = 'theToken'
 
       @ems = FactoryGirl.create(
         :ems_openshift,
@@ -68,6 +68,21 @@ describe ContainerResourceMixin do
       end
     end
 
+    it "can get the resource from the provider without unique attributes" do
+      VCR.use_cassette("mixins/#{described_class.name.underscore}/get_resoruce",
+                       :match_requests_on => [:path,]) do
+        results = @test_service.get_from_provider_clean
+        expect(results[:metadata][:selfLink]).to be_nil
+        expect(results[:metadata][:uid]).to be_nil
+        expect(results[:metadata][:resourceVersion]).to be_nil
+        expect(results[:metadata][:creationTimestamp]).to be_nil
+        expect(results[:metadata][:generation]).to be_nil
+        expect(results[:metadata][:generation]).to be_nil
+        expect(results[:spec][:clusterIP]).to be_nil
+        expect(results[:status]).to be_nil
+      end
+    end
+
     it "deletes the specified resource" do
       VCR.use_cassette("mixins/#{described_class.name.underscore}/delete_resoruce",
                        :match_requests_on => [:path,]) do
@@ -78,15 +93,23 @@ describe ContainerResourceMixin do
       end
     end
 
-    it "patches the resource in the provider" do
-      VCR.use_cassette("mixins/#{described_class.name.underscore}/patch_resoruce",
+    it "updates the resource in the provider" do
+      VCR.use_cassette("mixins/#{described_class.name.underscore}/update_resoruce",
                        :match_requests_on => [:path,]) do
-        #data_to_patch = {:metadata => {:annotations => {:key => 'value'}}}
-        data_to_patch = Kubeclient::Resource.new
-        data_to_patch[:metadata] = {}
-        data_to_patch[:metadata][:annotations] = {}
-        data_to_patch[:metadata][:annotations][:key] = "value"
-        @test_service.patch_in_provider(data_to_patch.to_h)
+        result = @test_service.get_from_provider
+        result[:metadata][:annotations][:description] = "Description has been updated."
+        expect { @test_service.update_in_provider(result) }.not_to raise_exception
+        result = @test_service.get_from_provider
+        expect(result[:metadata][:annotations][:description]).to eq("Description has been updated.")
+      end
+    end
+
+    it "raises an error if the kind in the update doesn't match the resource kind" do
+      VCR.use_cassette("mixins/#{described_class.name.underscore}/get_resoruce",
+                       :match_requests_on => [:path,]) do
+        result = @test_service.get_from_provider
+        result[:kind] = "Route"
+        expect { @test_service.update_in_provider(result) }.to raise_exception(MiqException::MiqProvisionError, "Unexpected Exception while updating object with resource name mysql in namespace namespace testproject.  The update kind Route doesn't match the existing resource kind Service.")
       end
     end
   end
